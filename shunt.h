@@ -7,6 +7,19 @@ template class Stack<char>;
 template class Queue<char>;
 
 
+bool ooo(char o1, char o2) {
+	if ( o1==o2 ) return 1;
+	if ( o1=='-' && o2=='+') return 0;
+	else return 1;
+	if ( o1=='*' && (o2=='-'||o2=='+') ) return 0;
+	else return 1;
+	if ( o1=='/' && (o2=='-'||o2=='+'||o2=='*') ) return 0;
+	else return 1;
+	if ( o1=='^' && (o2=='-'||o2=='+'||o2=='*'||o2=='/') ) return 0;
+	else return 1;
+}
+
+
 char* shunt(char *str) {
 	Queue<char> *queue = new Queue<char>();
 	Stack<char> *stack = new Stack<char>();
@@ -15,10 +28,15 @@ char* shunt(char *str) {
 		if ( str[i] >= 48 && str[i] <= 57 ) { // Is ascii number
 			//std::cout << "Added Number to Queue\n";
 			queue->enqueue(str[i]); // Add values to queue
-		} else if (str[i] == 94) { // Push ascii caret '^' to stack
+		} else if (str[i]==94 || str[i]==42 || str[i]==43 || str[i]==45 || str[i]==47) { // Push ascii caret '^' to stack
 			// while (the top of the stack isn't a left parenthesis):
 			//     pop o2 from the operator stack into the output queue
-			while (stack->peek() && *stack->peek()!=40 && stack->size()) queue->enqueue(stack->pop());
+			while (
+					stack->peek()
+					&& *stack->peek()!=40
+					&& stack->size()
+					&& ooo(str[i], *stack->peek())
+				) queue->enqueue(stack->pop());
 			// push o1 onto the operator stack
 			stack->push(str[i]);
 			//std::cout << "Added operator to Stack\n";
@@ -28,7 +46,7 @@ char* shunt(char *str) {
 		} else if (str[i] == 41) { // Is ascii right ')' parenthesis
 			while (stack->peek() && *stack->peek()!=40) { // While operator is not a left parenthesis
 				if ( !*stack->peek() ) return nullptr; // === ERROR: Mismatched parentheses ===
-				else if ( stack->peek() && *stack->peek() == 94 ) { /*std::cout <<"Moved operator "<<*stack->peek()<<" from Stack to Queue\n";*/ queue->enqueue(stack->pop()); } // Pop operator to queue
+				else if ( stack->peek() && ( *stack->peek()==94 || *stack->peek()==94 || *stack->peek()==42 || *stack->peek()==43 || *stack->peek()==45 || *stack->peek()==47 ) ) { std::cout <<"Moved operator "<<*stack->peek()<<" from Stack to Queue\n"; queue->enqueue(stack->pop()); } // Pop operator to queue
 				else return nullptr; // === ERROR: There is some invalid char in stack
 			}
 			//std::cout << "Removed "<<*stack->pop()<<" from Stack\n";
